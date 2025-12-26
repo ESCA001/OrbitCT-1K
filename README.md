@@ -84,7 +84,7 @@ It is strongly recommended to operate on a copy of the original DICOM data.
 - Users should verify compliance with local ethics and data governance requirements before distribution.
 
 
-# Script2: Axial Non-Contrast CT (NCCT) DICOM → NIfTI Preprocessing Script (nifti_extractor.py)
+# Script2: Axial NCCT DICOM → NIfTI Preprocessing Script (nifti_extractor.py)
 
 This repository provides an automated preprocessing pipeline to convert axial non-contrast CT series from DICOM into compressed NIfTI (`.nii.gz`) for downstream analysis.
 
