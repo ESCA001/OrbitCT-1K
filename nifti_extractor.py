@@ -127,7 +127,7 @@ def compute_spacing(dicoms, slice_cos):
     return row_spacing, col_spacing, dz
 
 
-def build_affine_ras(direction_row_lps, direction_col_lps, direction_slice_lps,
+def build_affine(direction_row_lps, direction_col_lps, direction_slice_lps,
                      spacing_rowcol_target, spacing_slice_target, origin_xyz=(0, 0, 0)):
     row = np.array(direction_row_lps, dtype=float)
     col = np.array(direction_col_lps, dtype=float)
@@ -135,7 +135,7 @@ def build_affine_ras(direction_row_lps, direction_col_lps, direction_slice_lps,
     row /= (np.linalg.norm(row) + 1e-8)
     col /= (np.linalg.norm(col) + 1e-8)
     slc /= (np.linalg.norm(slc) + 1e-8)
-    row = -row  # LPS->RAS
+    row = -row  # DICOM +X+Y+Z=LPS, NIfTI +X+Y+Z=RAS
     col = -col
     row_spacing_target, col_spacing_target = spacing_rowcol_target  # [RowSpacing(target sy), ColumnSpacing(target sx)]
     aff = np.eye(4, dtype=np.float32)
@@ -316,7 +316,7 @@ def extract_axial_ncct_to_nii(parent, out_root, log_file,
                 row_lps, col_lps = iop[:3], iop[3:]
                 row_spacing_target = target_spacing[1]  # Y
                 col_spacing_target = target_spacing[0]  # X
-                affine = build_affine_ras(
+                affine = build_affine(
                     row_lps, col_lps, slice_cos_lps,
                     spacing_rowcol_target=(row_spacing_target, col_spacing_target),
                     spacing_slice_target=target_spacing[2],
@@ -334,6 +334,10 @@ def extract_axial_ncct_to_nii(parent, out_root, log_file,
 
             vol_out_nifti = np.transpose(vol_proc, (2, 1, 0))  # (X,Y,Z)
             img = nib.Nifti1Image(vol_out_nifti, affine.astype(np.float32))
+
+            # LPS->RAS canonical
+            img = nib.as_closest_canonical(img)
+           
             nib.save(img, out_path)
 
             z, y, x = vol_proc.shape
